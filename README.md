@@ -1,8 +1,7 @@
 # Fake Therminal <br>
 *Work in progress* <br>
-<br>
-### DONT FORGET TO EXTRACT pj.zip in the same folder as main.py and Tickets! <br>
-### Commands: <br>
+### DONT FORGET to extract pj.zip in the same folder as main.py and Tickets!
+### Commands:
 <br>
 cd /dir_name/ - move above <br>
 cd / - move to root folder <br>
