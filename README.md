@@ -2,7 +2,6 @@
 *Work in progress* <br>
 ### DONT FORGET to extract pj.zip in the same folder as main.py and Tickets!
 ### Commands:
-<br>
 cd /dir_name/ - move above <br>
 cd / - move to root folder <br>
 cd ~ - move to directory bellow <br>
