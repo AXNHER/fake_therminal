@@ -1,6 +1,6 @@
 # Fake Therminal <br>
 
-Work in progress <br>
+*Work in progress* <br>
 <br>
 cd /dir_name/ - move above <br>
 cd / - move to root folder <br>
