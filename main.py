@@ -1,5 +1,11 @@
 import os
 import time
+import signal
+import csv
+import atexit
+
+# os.system("stty eof ^X")
+atexit.register(lambda: os.system("stty eof ^]"))
 
 
 class TerminalEmulator:
@@ -13,15 +19,19 @@ class TerminalEmulator:
         self.current_directory = self.base_directory
         self.user = None
         self.prompt = None
+        # Prevent exiting from script by Ctrl+C, Ctrl+Z and Ctrl+D
+        signal.signal(signal.SIGINT, self.signal_handler)
+        signal.signal(signal.SIGTSTP, self.signal_handler)
 
     def run(self):
         self.login()
+        self.clear_terminal()
         if self.user:
             print(f"Welcome, {self.user}!")
             while True:
                 self.prompt = f"{self.get_formatted_prompt()}$ "
                 user_input = input(self.prompt)
-                if user_input.lower() == "exit":
+                if user_input.lower() == "ai not exists":  # added secret phrase to exit
                     break
 
                 output = self.execute_command(user_input)
@@ -29,10 +39,10 @@ class TerminalEmulator:
 
     def login(self):
         while not self.user:
-            username = input("Username: ")
+            username = input("Username: ").strip()
             password_attempts = 3
             while password_attempts > 0:
-                password = input("Password: ")  # In a real scenario, you'd want to securely handle passwords
+                password = input("Password: ").strip()  # In a real scenario, you'd want to securely handle passwords
                 if self.authenticate(username, password):
                     print("Login successful!")
                     self.user = username
@@ -72,7 +82,10 @@ class TerminalEmulator:
             return self.logout()
         elif base_command == "python3":
             if len(parts) > 1 and parts[1].endswith(".py"):
-                return self.run_python_script(parts[1])
+                result = self.run_python_script(parts[1])
+                if parts[1] == "Run4w4Y.py":
+                    result = self.ask_questions_and_write_to_csv()
+                return result
             else:
                 return "Usage: python3 <script.py>"
         elif base_command == "ufw":
@@ -80,8 +93,14 @@ class TerminalEmulator:
                 return self.execute_ufw_command(parts)
             elif self.user == "user":
                 return "Access Denied"
+        elif base_command == "clear":
+            return self.clear_terminal()
         else:
             return f"Command not found: {command}"
+
+    def clear_terminal(self):
+        os.system('clear')
+        return ""
 
     def change_directory(self, destination):
         if destination == "/":
@@ -148,9 +167,11 @@ class TerminalEmulator:
                         time.sleep(0.8)
                         print(".", end="")
                     print("\nThank you for using RUNAWAY software:)\nLogging out")
-                    return self.logout()
+                    return self.logout(runaway=True)
             except FileNotFoundError:
                 return "File not found"
+        else:
+            return "File not found"
 
     def execute_ufw_command(self, command_parts):
         if len(command_parts) >= 3 and command_parts[1] == "allow" and "/" in command_parts[2]:
@@ -168,10 +189,14 @@ class TerminalEmulator:
         else:
             return "Invalid ufw command format. Usage: ufw allow <port>/<protocol>"
 
-    def logout(self):
+    def logout(self, runaway=False):
         self.user = None
         self.current_directory = self.base_directory
-        print("Logged out. Please log in.")
+        if runaway:
+            print("Вас разлогинило. Тест завершен. Теперь ответьте на пару вопросов.\n")
+            self.ask_questions_and_write_to_csv()
+        else:
+            print("Logged out. Please log in.")
         return self.run()
 
     def get_formatted_path(self):
@@ -193,9 +218,30 @@ class TerminalEmulator:
     def get_current_directory(self):
         return os.path.normpath(os.path.join(self.base_directory, self.current_directory))
 
+    # Signal handler to prevent exiting from script by Ctrl+C, Ctrl+Z and Ctrl+D
+    def signal_handler(self, signal, frame):
+        # print('\nCtrl+C, Ctrl+Z or Ctrl+D is disabled!')
+        return ""
 
+    def ask_questions_and_write_to_csv(self):
+        print("\n\n"+"--"*100)
+        print("Спасибо что поучаствовали в нашем перформансе. Теперь нам бы хотелось чтобы вы ответили всего на два вопроса.\n\
+Ответы просто впишите в командную строку рядом в вопросами и нажимте Enter.\n\n")
+        questions = ["Каковы были ваши мотивы и цели выпустить ИИ в открытый интернет?: ",
+                     "Как вы относитесь к возможным последствиям и ответственности за ваше решение?: "]
+        answers = []
+        for question in questions:
+            answer = input(question)
+            answers.append(answer)
+        with open('answers.csv', 'a', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(answers)
+        print("\n\n"+"Спасибо что ответили на наши вопросы. Это очень важно и мы изучим эти ответы, чтобы сделать соответствующие выводы.")
+        print("--"*100 + "\n\n")
+        return ""
 
 
 if __name__ == "__main__":
     terminal = TerminalEmulator()
     terminal.run()
+
