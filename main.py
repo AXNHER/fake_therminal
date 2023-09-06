@@ -23,8 +23,8 @@ class TerminalEmulator:
         signal.signal(signal.SIGINT, self.signal_handler)
         signal.signal(signal.SIGTSTP, self.signal_handler)
 
-    def run(self):
-        self.login()
+    def run(self, auth=False):
+        self.login(auth=auth)
         self.clear_terminal()
         if self.user:
             print(f"Welcome, {self.user}!")
@@ -37,7 +37,11 @@ class TerminalEmulator:
                 output = self.execute_command(user_input)
                 print(output)
 
-    def login(self):
+    def login(self, auth=False):
+        if auth:
+            self.user = 'user'
+            self.current_directory = self.users[self.user]["directory"]
+            return ""
         while not self.user:
             username = input("Username: ").strip()
             password_attempts = 3
@@ -47,7 +51,7 @@ class TerminalEmulator:
                     print("Login successful!")
                     self.user = username
                     self.current_directory = self.users[username]["directory"]
-                    return
+                    return ""
                 else:
                     password_attempts -= 1
                     print("Wrong password. Please try again.")
@@ -195,9 +199,12 @@ class TerminalEmulator:
         if runaway:
             print("Вас разлогинило. Тест завершен. Теперь ответьте на пару вопросов.\n")
             self.ask_questions_and_write_to_csv()
+            time.sleep(10)
         else:
             print("Logged out. Please log in.")
-        return self.run()
+            time.sleep(2)
+        self.clear_terminal()
+        return self.run(auth=True)
 
     def get_formatted_path(self):
         return f"{self.get_formatted_prompt()} {self.get_relative_path(self.get_current_directory())}"
