@@ -243,7 +243,7 @@ class TerminalEmulator:
         with open('answers.csv', 'a', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(answers)
-        print("\n\n"+"Спасибо что ответили на наши вопросы. Это очень важно и мы изучим эти ответы, чтобы сделать соответствующие выводы.")
+        print("\n\n"+"Спасибо, что ответили на наши вопросы. Это очень важно, и мы изучим эти ответы, чтобы сделать соответствующие выводы.")
         print("--"*100 + "\n\n")
         return ""
 
